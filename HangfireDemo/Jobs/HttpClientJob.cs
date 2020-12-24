@@ -4,12 +4,13 @@ using System.Threading.Tasks;
 
 namespace HangfireDemo.Jobs
 {
-    public class MyHangfireJobs
+    public class HttpClientJob
     {
         public async Task SendGetRequest()
         {
             var client = new HttpClient();
-            await client.GetAsync("https://www.accelist.com");
+            var response = await client.GetAsync("https://www.accelist.com");
+            Console.WriteLine(string.Format("Request Status: {0} - {1}", response.StatusCode, DateTime.Now));
         }
     }
 }

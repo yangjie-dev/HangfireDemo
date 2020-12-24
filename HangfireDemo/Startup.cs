@@ -45,7 +45,11 @@ namespace HangfireDemo
                 configuration.UseRedisStorage(Redis);
             });
 
-            services.AddTransient<MyHangfireJobs>();
+            //services.AddTransient<HttpClientJob>();
+
+            //services.AddTransient<NotificationJob>();
+
+            //services.AddTransient<WelcomeJob>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -69,9 +73,13 @@ namespace HangfireDemo
                 endpoints.MapControllers();
             });
 
-            app.UseHangfireServer();
+            app.UseHangfireServer(new BackgroundJobServerOptions { WorkerCount = 2 });
 
-            RecurringJob.AddOrUpdate<MyHangfireJobs>("RecurringSendGetRequest", jobs => jobs.SendGetRequest(), Cron.Minutely());
+            BackgroundJob.Enqueue<WelcomeJob>(jobs => jobs.SendWelcome());
+
+            BackgroundJob.Schedule<NotificationJob>(jobs => jobs.SendNotification(), DateTimeOffset.UtcNow.AddMinutes(1));
+
+            RecurringJob.AddOrUpdate<HttpClientJob>(typeof(HttpClientJob).Name, jobs => jobs.SendGetRequest(), Cron.Minutely());
 
             app.UseHangfireDashboard();
         }
